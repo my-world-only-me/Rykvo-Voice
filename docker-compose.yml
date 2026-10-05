@@ -2,12 +2,13 @@
 # 管理员密码在容器首次启动时自动初始化；账号已存在则跳过，改密码需在网页里操作
 # 手动初始化（不用环境变量时）：printf '%s' '管理员密码' | docker compose exec -T app rykvo-auth -init
 #
-# EC20 模组直通（与 VoCat 栈同款方案，桥接版）：
-#   - privileged: true    必须。串口 / QMI 控制节点 / 设备热插拔需要特权。
-#   - /dev 绑定挂载       新增 ttyUSB* / cdc-wdm* 无需重建容器即可被识别（Quectel 2c7c）。
-#   - user: "0:0"         root 才能访问上述硬件节点。
-#   - 桥接模式下 QMI 控制面（短信/语音/SIM/eSIM）可用；模组数据面接口（wwan0/usb0）
-#     对容器不可见，如需蜂窝数据承载改回 network_mode: host 并去掉 ports。
+# 完整能力部署（与宿主机部署对等）：
+#   - network_mode: host   必须。网络控制/SIP/VoWiFi 助手需操纵宿主网络，QMI 数据面接口需可见。
+#   - privileged: true     必须。nftables/路由/netns/串口/QMI 节点/热插拔需要特权。
+#   - /dev 绑定挂载        新增 ttyUSB* / cdc-wdm* 无需重建容器即可被识别（Quectel 2c7c）。
+#   - NGINX_PORT           宿主 80 被占用时改这里（如 7575），宿主反代回源到 127.0.0.1:该端口。
+#   - PUBLIC_ORIGIN        经域名反代访问时设置，值为浏览器地址栏 scheme://host[:端口]（不带路径）。
+#   - 注意：部分能力（VoWiFi/XFRM、nftables 规则）依赖宿主机内核模块支持。
 services:
   db:
     image: postgres:16
@@ -16,6 +17,8 @@ services:
       POSTGRES_DB: rykvo_voice
       POSTGRES_USER: rykvo
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在 .env 中设置 POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432" # app 走 host 网络，经宿主回环连接数据库
     volumes:
       - ./postgres:/var/lib/postgresql/data
     healthcheck:
@@ -33,36 +36,38 @@ services:
       db:
         condition: service_healthy
 
+    network_mode: host
     privileged: true
     user: "0:0"
 
     environment:
       - TZ=Asia/Shanghai
-      - DATABASE_URL=postgres://rykvo:${POSTGRES_PASSWORD}@db:5432/rykvo_voice?sslmode=disable
-      - WEB_ROOT=/app/web
-      # 经域名反代访问时必须设置，值为浏览器地址栏的 scheme://host[:端口]（不带路径）
+      - DATABASE_URL=postgres://rykvo:${POSTGRES_PASSWORD}@127.0.0.1:5432/rykvo_voice?sslmode=disable
+      - WEB_ROOT=/opt/rykvo-voice/live/web
+      - NGINX_PORT=${NGINX_PORT:-80}
       - PUBLIC_ORIGIN=${PUBLIC_ORIGIN:-}
       - RYKVO_ADMIN_PASSWORD=${RYKVO_ADMIN_PASSWORD:-}
       # 更安全：改用密钥文件（docker secrets / bind 挂载），文件末尾换行会被自动去除
       # - RYKVO_ADMIN_PASSWORD_FILE=/run/secrets/rykvo-admin-password
       - RYKVO_VISIBILITY_PASSWORD=${RYKVO_VISIBILITY_PASSWORD:-}
       # - RYKVO_VISIBILITY_PASSWORD_FILE=/run/secrets/rykvo-visibility-password
-
-    ports:
-      - "${HTTP_PORT:-8080}:80" # 宿主 80 被占用，默认改 8080；.env 里 HTTP_PORT 可再改
+      - RYKVO_WIFI_ENGINE=vocat
+      - CONTROL_SOCKET=/run/rykvo-voice/control.sock
+      - TUNNEL_DIR=/var/lib/rykvo-voice/tunnel
+      - TUNNEL_BIN=/opt/rykvo-voice/live/cloudflared
 
     volumes:
       - ./data:/var/lib/rykvo-voice
       - /dev:/dev
       - /sys:/sys:ro
 
-    mem_limit: 512m
-    memswap_limit: 640m
-    stop_grace_period: 20s
+    mem_limit: 768m
+    memswap_limit: 896m
+    stop_grace_period: 30s
 
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:80/"]
+      test: "wget -q -O /dev/null http://127.0.0.1:$${NGINX_PORT}/ || exit 1"
       interval: 60s
       timeout: 5s
       retries: 3
-      start_period: 60s
+      start_period: 90s

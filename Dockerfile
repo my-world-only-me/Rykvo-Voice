@@ -58,6 +58,7 @@ RUN chmod 0755 /entrypoint.sh /opt/rykvo-voice/live/rykvo-auth /opt/rykvo-voice/
  && printf '#!/bin/sh\nexec python3 -I /opt/rykvo-voice/live/sip-network.py "$@"\n' > /opt/rykvo-voice/live/sip.sh \
  && printf '#!/bin/sh\nexec /opt/rykvo-voice/live/rykvo-auth -hardware-wifi-worker "$@"\n' > /opt/rykvo-voice/live/wifi.sh \
  && chmod 0755 /opt/rykvo-voice/live/*.sh \
+ && addgroup -S rykvo_voice && adduser -S -D -H -G rykvo_voice rykvo_voice \
  && mkdir -p /var/lib/rykvo-voice/voice-audio /var/lib/rykvo-voice/message-results \
               /var/lib/rykvo-voice/tunnel /var/lib/rykvo-sip-network \
               /var/lib/rykvo-network /var/lib/rykvo-network-route /run/rykvo-voice

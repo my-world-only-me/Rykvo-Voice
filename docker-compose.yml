@@ -40,6 +40,8 @@ services:
       - TZ=Asia/Shanghai
       - DATABASE_URL=postgres://rykvo:${POSTGRES_PASSWORD}@db:5432/rykvo_voice?sslmode=disable
       - WEB_ROOT=/app/web
+      # 经域名反代访问时必须设置，值为浏览器地址栏的 scheme://host[:端口]（不带路径）
+      - PUBLIC_ORIGIN=${PUBLIC_ORIGIN:-}
       - RYKVO_ADMIN_PASSWORD=${RYKVO_ADMIN_PASSWORD:-}
       # 更安全：改用密钥文件（docker secrets / bind 挂载），文件末尾换行会被自动去除
       # - RYKVO_ADMIN_PASSWORD_FILE=/run/secrets/rykvo-admin-password

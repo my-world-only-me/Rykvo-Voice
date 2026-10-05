@@ -22,7 +22,7 @@ server {
         client_max_body_size 1m;
         client_body_timeout 65s;
         proxy_request_buffering off;
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://${RYKVO_HTTP_ADDR};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -37,7 +37,7 @@ server {
         client_max_body_size 1600k;
         client_body_timeout 10s;
         proxy_request_buffering off;
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://${RYKVO_HTTP_ADDR};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -52,7 +52,7 @@ server {
     }
     location / {
         client_max_body_size 1600k; # Each JSON API also enforces its own smaller limit.
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://${RYKVO_HTTP_ADDR};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;

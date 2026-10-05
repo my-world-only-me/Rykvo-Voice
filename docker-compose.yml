@@ -45,6 +45,7 @@ services:
       - DATABASE_URL=postgres://rykvo:${POSTGRES_PASSWORD}@127.0.0.1:5432/rykvo_voice?sslmode=disable
       - WEB_ROOT=/opt/rykvo-voice/live/web
       - NGINX_PORT=${NGINX_PORT:-80}
+      - RYKVO_HTTP_ADDR=127.0.0.1:18080 # 宿主回环 8080 可能被其他栈占用，容器内换端口
       - PUBLIC_ORIGIN=${PUBLIC_ORIGIN:-}
       - RYKVO_ADMIN_PASSWORD=${RYKVO_ADMIN_PASSWORD:-}
       # 更安全：改用密钥文件（docker secrets / bind 挂载），文件末尾换行会被自动去除

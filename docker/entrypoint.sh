@@ -5,8 +5,10 @@ LIVE=/opt/rykvo-voice/live
 : "${DATABASE_URL:?DATABASE_URL is required}"
 
 NGINX_PORT=${NGINX_PORT:-80}
+RYKVO_HTTP_ADDR=${RYKVO_HTTP_ADDR:-127.0.0.1:8080}
+export NGINX_PORT RYKVO_HTTP_ADDR
 export NGINX_PORT
-envsubst '$NGINX_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
+envsubst '$NGINX_PORT $RYKVO_HTTP_ADDR' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
 
 count=0
 until "$LIVE/rykvo-auth" -migrate; do

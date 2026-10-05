@@ -42,7 +42,7 @@ RUN chmod 0755 /out/*
 # 运行层：与宿主机部署同布局 /opt/rykvo-voice/live
 FROM nginx:alpine
 RUN apk add --no-cache python3 socat nftables iptables iproute2 wireguard-tools \
-    ca-certificates tzdata libqmi pcsc-lite-libs libccid opus opencore-amr vo-amrwbenc
+    ca-certificates tzdata libqmi pcsc-lite-libs opus opencore-amr vo-amrwbenc
 COPY --from=build /out/rykvo-auth /opt/rykvo-voice/live/rykvo-auth
 COPY --from=bins /out/ /opt/rykvo-voice/live/
 COPY deploy/network-control.py deploy/network_runtime.py deploy/host-settings.py \

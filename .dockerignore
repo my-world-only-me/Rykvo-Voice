@@ -1,5 +1,6 @@
 *
 !VERSION
+!UPDATE_EPOCH
 !backend/
 !frontend/
 !docker/

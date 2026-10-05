@@ -37,6 +37,8 @@ unset admin_password visibility_password RYKVO_ADMIN_PASSWORD RYKVO_ADMIN_PASSWO
     RYKVO_VISIBILITY_PASSWORD RYKVO_VISIBILITY_PASSWORD_FILE
 
 # systemd socket activation 等价实现：socat 每连接派生一个助手进程
+mkdir -p /var/lib/rykvo-voice/voice-audio /var/lib/rykvo-voice/message-results \
+         /var/lib/rykvo-voice/tunnel /run/rykvo-voice
 rm -f /run/rykvo-voice-qmi.sock /run/rykvo-voice-host.sock \
       /run/rykvo-voice-wifi.sock /run/rykvo-sip-network.sock
 pids=''

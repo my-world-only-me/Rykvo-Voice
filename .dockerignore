@@ -1,0 +1,9 @@
+*
+!VERSION
+!backend/
+!frontend/
+!docker/
+backend/**/*_test.go
+backend/rykvo-auth
+frontend/tests/
+**/*.md

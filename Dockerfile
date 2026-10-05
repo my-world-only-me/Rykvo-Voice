@@ -17,7 +17,8 @@ COPY frontend/ /app/web/
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/entrypoint.sh /entrypoint.sh
 ENV WEB_ROOT=/app/web
-RUN chmod +x /entrypoint.sh \
+RUN apk add --no-cache tzdata \
+    && chmod +x /entrypoint.sh \
     && mkdir -p /var/lib/rykvo-voice/voice-audio \
                 /var/lib/rykvo-voice/message-results \
                 /var/lib/rykvo-voice/tunnel

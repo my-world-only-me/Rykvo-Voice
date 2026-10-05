@@ -55,8 +55,8 @@ pids="$pids $!"
 socat UNIX-LISTEN:/run/rykvo-voice-wifi.sock,fork EXEC:$LIVE/wifi.sh &
 pids="$pids $!"
 
-python3 -I "$LIVE/network-control.py" --cleanup >/dev/null 2>&1 || true
-python3 -I "$LIVE/network-control.py" &
+python3 "$LIVE/network-control.py" --cleanup >/dev/null 2>&1 || true
+python3 "$LIVE/network-control.py" &
 pids="$pids $!"
 
 "$LIVE/rykvo-auth" &
@@ -74,7 +74,7 @@ stop() {
     for p in $pids; do
         wait "$p" 2>/dev/null || true
     done
-    timeout 10 python3 -I "$LIVE/network-control.py" --cleanup >/dev/null 2>&1 || true
+    timeout 10 python3 "$LIVE/network-control.py" --cleanup >/dev/null 2>&1 || true
     exit "$code"
 }
 trap stop TERM INT

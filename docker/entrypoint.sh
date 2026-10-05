@@ -13,6 +13,24 @@ until rykvo-auth -migrate; do
     sleep 2
 done
 
+admin_password=${RYKVO_ADMIN_PASSWORD:-}
+if [ -n "${RYKVO_ADMIN_PASSWORD_FILE:-}" ] && [ -r "$RYKVO_ADMIN_PASSWORD_FILE" ]; then
+    admin_password=$(cat "$RYKVO_ADMIN_PASSWORD_FILE")
+fi
+if [ -n "$admin_password" ]; then
+    printf '%s' "$admin_password" | rykvo-auth -init
+fi
+
+visibility_password=${RYKVO_VISIBILITY_PASSWORD:-}
+if [ -n "${RYKVO_VISIBILITY_PASSWORD_FILE:-}" ] && [ -r "$RYKVO_VISIBILITY_PASSWORD_FILE" ]; then
+    visibility_password=$(cat "$RYKVO_VISIBILITY_PASSWORD_FILE")
+fi
+if [ -n "$visibility_password" ]; then
+    printf '%s' "$visibility_password" | rykvo-auth -init-visibility
+fi
+unset admin_password visibility_password RYKVO_ADMIN_PASSWORD RYKVO_ADMIN_PASSWORD_FILE \
+    RYKVO_VISIBILITY_PASSWORD RYKVO_VISIBILITY_PASSWORD_FILE
+
 rykvo-auth &
 backend=$!
 
